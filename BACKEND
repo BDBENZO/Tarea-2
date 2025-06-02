@@ -1,0 +1,60 @@
+package backend;
+
+import java.util.*;
+
+public class ExamManager {
+    private List<Item> items = new ArrayList<>();
+    private Map<Integer, String> userAnswers = new HashMap<>();
+    private int currentIndex = 0;
+
+    public void loadItems(List<Item> newItems) {
+        items = newItems;
+        userAnswers.clear();
+        currentIndex = 0;
+    }
+
+    public Item getCurrentItem() {
+        return items.get(currentIndex);
+    }
+
+    public boolean hasNext() {
+        return currentIndex < items.size() - 1;
+    }
+
+    public boolean hasPrevious() {
+        return currentIndex > 0;
+    }
+
+    public void next() {
+        if (hasNext()) currentIndex++;
+    }
+
+    public void previous() {
+        if (hasPrevious()) currentIndex--;
+    }
+
+    public void saveAnswer(String answer) {
+        userAnswers.put(currentIndex, answer);
+    }
+
+    public Map<Item.BloomLevel, Integer> getStatsByBloomLevel() {
+        Map<Item.BloomLevel, Integer> stats = new EnumMap<>(Item.BloomLevel.class);
+        for (Item.BloomLevel level : Item.BloomLevel.values()) stats.put(level, 0);
+
+        for (int i = 0; i < items.size(); i++) {
+            Item item = items.get(i);
+            if (item.correctAnswer.equalsIgnoreCase(userAnswers.getOrDefault(i, ""))) {
+                stats.put(item.level, stats.get(item.level) + 1);
+            }
+        }
+        return stats;
+    }
+
+    public int getTotalTime() {
+        return items.stream().mapToInt(i -> i.estimatedTime).sum();
+    }
+
+    public int getItemCount() {
+        return items.size();
+    }
+}
